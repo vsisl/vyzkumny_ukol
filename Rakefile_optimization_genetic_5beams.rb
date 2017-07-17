@@ -1,5 +1,5 @@
 require 'pp'
-require 'active_support/core_ext/enumerable.rb'		# umožňuje array.sum
+require 'active_support/core_ext/enumerable.rb'									# array.sum
 
 #----------------------------------------------------------------------------
 #--------------------------------- METHODS ----------------------------------
@@ -19,16 +19,22 @@ def load_irradiation_profile (file_irradiation_profile, nr_of_coat_bins)
 end	
 #----------------------------------------------------------------------------
 
-# method for inicializing the population with individuals with random values of genes a,b 
-def initialize_population_2beams (population, population_size)
+# method for inicializing the population with individuals with random values of genes a,b...
+def initialize_population_5beams (population, population_size)
 	(0..population_size - 1).each do |i|
 		a = Kernel.rand.to_f 
 		b = Kernel.rand.to_f
-
-		sum = a + b
+		c = Kernel.rand.to_f
+		d = Kernel.rand.to_f
+		e = Kernel.rand.to_f 
+		
+		sum = a + b + c + d + e
 		
 		population[i][0] = a/sum						
 		population[i][1] = b/sum
+		population[i][2] = c/sum
+		population[i][3] = d/sum
+		population[i][4] = e/sum
 	end
 
 	puts "------- Initial population (random) -----------"
@@ -42,7 +48,7 @@ def initialize_population_2beams (population, population_size)
 end
 
 # fitness method - expresses the quality of an individual; returns the SDEV float
-def fitness_2beams (array_individual, array_A, array_B, nr_of_coat_bins)		# array_individual = [a, b]
+def fitness_5beams (array_individual, array_A, array_B, array_C, array_D, array_E, nr_of_coat_bins)		# array_individual = [a, b]
 	const_S1 = 		0.0
 	const_S2 = 		0.0
 	const_SDEV = 	0.0
@@ -50,9 +56,12 @@ def fitness_2beams (array_individual, array_A, array_B, nr_of_coat_bins)		# arra
 	
 	a = array_individual[0]
 	b = array_individual[1]
+	c = array_individual[2]
+	d = array_individual[3]
+	e = array_individual[4]
 
 	(0..nr_of_coat_bins - 1).each do |i|										# iteration over the depth of the coating part of the target
-		array_f[i] = 	a * array_A[i] + b * array_B[i]							# f(z) is the overall distribution of defects made by a sum of the first distribution A(z) and the second distribution B(z)
+		array_f[i] = 	a * array_A[i] + b * array_B[i]	+ c * array_C[i] + d * array_D[i] + e * array_E[i]						# f(z) is the overall distribution of defects made by a sum of the first distribution A(z) and the second distribution B(z)
 		const_S1 += 	array_f[i]											
 		const_S2 += 	array_f[i]**2
 	end
@@ -64,10 +73,12 @@ def fitness_2beams (array_individual, array_A, array_B, nr_of_coat_bins)		# arra
 			puts (const_S1/nr_of_coat_bins)**2
 			puts (const_S2/nr_of_coat_bins - (const_S1/nr_of_coat_bins)**2)
 			puts 1/(nr_of_coat_bins - 1).to_f * (const_S2/nr_of_coat_bins - (const_S1/nr_of_coat_bins)**2)
-		end	
+		end		
 
 	const_SDEV = Math.sqrt(1/(nr_of_coat_bins - 1).to_f * (const_S2/nr_of_coat_bins - (const_S1/nr_of_coat_bins)**2))	# standard deviation formula from MCNP
-	
+	# const_SDEV = (1/nr_of_coat_bins).to_f * Math.sqrt(nr_of_coat_bins * const_S2 - const_S1**2).to_f												# alternative formula for standard deviation
+	# array_SDEV[i] = Math.sqrt((100 * array_S2[i] - array_S1[i]**2)/(100 * 99))												# alternative formula for standard deviation
+
 	return 1/const_SDEV															# the lower standard deviation (const_SDEV) the better is the individual; we want to maximize fitness => returns 1/const_SDEV
 end	
 #----------------------------------------------------------------------------
@@ -90,16 +101,23 @@ def pick_random_individuum(array_fitness, sum_fitness, population_size)  		# arr
 end
 #----------------------------------------------------------------------------
 
-def optimization_plot_2beams(array_individual, file_DPA_1, file_DPA_2, folder_images, i_generation, coat_width, clad_width, nr_of_coat_bins, coating_type)
+def optimization_plot_5beams(array_individual, file_DPA_1, file_DPA_2, file_DPA_3, file_DPA_4, file_DPA_5, folder_images, i_generation, coat_width, clad_width, nr_of_coat_bins, coating_type)
 	gnuplot = 	"\"C:/Program Files (x86)/gnuplot/bin/gnuplot.exe\""
 
 	FileUtils.mkdir(folder_images) unless File.exists?(folder_images)
 
 	a = array_individual[0]
 	b = array_individual[1]
-	
+	c = array_individual[2]
+	d = array_individual[3]
+	e = array_individual[4]
+
+
 	array_A = []
 	array_B = []
+	array_C = []
+	array_D = []
+	array_E = []
 	
 	File.foreach(file_DPA_1).with_index do |line, line_nr|					# loading the first irradiation profile
 		if line_nr > 0 														# skip firts line (header), index 0
@@ -110,6 +128,24 @@ def optimization_plot_2beams(array_individual, file_DPA_1, file_DPA_2, folder_im
 	File.foreach(file_DPA_2).with_index do |line, line_nr|					
 		if line_nr > 0 														
 			array_B << line.strip.split[1].to_f			
+		end
+	end
+
+	File.foreach(file_DPA_3).with_index do |line, line_nr|					
+		if line_nr > 0 														
+			array_C << line.strip.split[1].to_f			
+		end
+	end
+
+	File.foreach(file_DPA_4).with_index do |line, line_nr|					
+		if line_nr > 0 														
+			array_D << line.strip.split[1].to_f			
+		end
+	end
+
+	File.foreach(file_DPA_5).with_index do |line, line_nr|					
+		if line_nr > 0 														
+			array_E << line.strip.split[1].to_f			
 		end
 	end
 
@@ -127,7 +163,13 @@ def optimization_plot_2beams(array_individual, file_DPA_1, file_DPA_2, folder_im
 	# creating a .dat file which includes the final damage distribution as a sum of 3 distributions
 	File.open("#{folder_images}/Generace_#{i_generation}.dat", "w") do |output|
 		array_x_axis.each_with_index do |x_axis, i|
-			output.puts x_axis.to_s + "       " + (a * array_A[i] + b * array_B[i]).to_s
+			# puts "a = #{a}"
+			# puts "b = #{b}"
+			# puts "c = #{c}"
+			# puts "array_A[#{i}] = #{array_A[i]}"
+			# puts "array_B[#{i}] = #{array_B[i]}"
+			# puts "array_C[#{i}] = #{array_C[i]}"
+			output.puts x_axis.to_s + "       " + (a * array_A[i] + b * array_B[i] + c * array_C[i] + d * array_D[i] + e * array_E[i]).to_s
 		end
 	end
 
@@ -150,7 +192,7 @@ def optimization_plot_2beams(array_individual, file_DPA_1, file_DPA_2, folder_im
 
 		output.puts "set terminal png"
 		output.puts "set output \"#{folder_images}/Generace_#{i_generation}.png\""
-		output.puts "plot \"#{folder_images}/Generace_#{i_generation}.dat\" using ($1/10000):2 with boxes title \"Gen. #{i_generation}, a = #{a.round(3)}, b = #{b.round(3)}\""
+		output.puts "plot \"#{folder_images}/Generace_#{i_generation}.dat\" using ($1/10000):2 with boxes title \"Gen. #{i_generation}, a = #{a.round(3)}, b = #{b.round(3)}, c = #{c.round(3)}, d = #{d.round(3)}, e = #{e.round(3)}\""
 		
 		# output.puts "set terminal cairolatex pdf colortext"
 		# output.puts "set output \"#{folder_images}/#{file_DPA_basename}.tex\""
@@ -167,43 +209,50 @@ end
 #--------------------------------------------      TASKS      ------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------
 
-desc "optimization based on genetic algorithms, for two ion beams"
-task :optimization_genetic_2beams do
+desc "optimization based on genetic algorithms, for five ion beams"
+task :optimization_genetic_5beams do
 	folder_data = 					"myData"
 	file_simulation_settings = 		"#{folder_data}/simulation_settings"
 	coating_type =					"FeCrAl"
 	folder_outputs = 				"#{folder_data}/Outputs_#{coating_type}"
-	nr_of_beams =					2
+	nr_of_beams =					5
 	folder_images = 				"#{folder_outputs}/Img_optimalizace_#{nr_of_beams}beams"
 	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Si28_1700keV_DPA.dat"
-	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_Si28_3000keV_DPA.dat"
-	# file_DPA_1 =					"#{folder_outputs}/test_1.dat"
-	# file_DPA_2 =					"#{folder_outputs}/test_3.dat"
-
-	simulation_settings =		Marshal.load(File.open(file_simulation_settings, 'rb').read)		# simulation_settings is a hash containing all data from the file_simulation_settings
-	coat_width = 				simulation_settings[coating_type]["coat_width"].to_f
-	clad_width = 				simulation_settings[coating_type]["clad_width"].to_f
-	bin_width = 				(coat_width + clad_width)/100 										# Delta_z [A]
-	nr_of_coat_bins = 			((coat_width/(coat_width + clad_width)) * 100).to_i			
+	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_O16_3000keV_DPA.dat"
+	file_DPA_3 = 					"#{folder_outputs}/#{coating_type}_O16_6000keV_DPA.dat"
+	file_DPA_4 =					"#{folder_outputs}/#{coating_type}_Si28_3000keV_DPA.dat"
+	file_DPA_5 = 					"#{folder_outputs}/#{coating_type}_He4_1700keV_DPA.dat"
+	
+	simulation_settings =			Marshal.load(File.open(file_simulation_settings, 'rb').read)		# simulation_settings is a hash containing all data from the file_simulation_settings
+	coat_width = 					simulation_settings[coating_type]["coat_width"].to_f
+	clad_width = 					simulation_settings[coating_type]["clad_width"].to_f
+	bin_width = 					(coat_width + clad_width)/100 										# Delta_z [A]
+	nr_of_coat_bins = 				((coat_width/(coat_width + clad_width)) * 100).to_i			
 
 	array_A = []
 	array_B = []
+	array_C = []
+	array_D = []
+	array_E = []
 	
 	array_A = load_irradiation_profile(file_DPA_1, nr_of_coat_bins)						# irradiation profile of the first beam
 	array_B = load_irradiation_profile(file_DPA_2, nr_of_coat_bins)
-	
-	nr_of_genes =			nr_of_beams													# individual is described by its genes; [a, b]; the number of geses is equal to the number of ion beams used in irradiation
-	cross_rate = 			1.0															# probability of crossing (křížení), typically 0.7 - 1
-	mutation_rate = 		0.05														# probability of mutation of each gene; gene = parameter of an individual (a, b)
-	population_size = 		80															# nr. of individuals in one population
-	nr_of_generations = 	200															# nr. of populations in the simulation
-	population = 			Array.new(population_size){Array.new(nr_of_genes)} 			# array population_size x nr. of genes (80x2); contains all individuals in the population
+	array_C = load_irradiation_profile(file_DPA_3, nr_of_coat_bins)
+	array_D = load_irradiation_profile(file_DPA_4, nr_of_coat_bins)
+	array_E = load_irradiation_profile(file_DPA_5, nr_of_coat_bins)
 
-	population = 			initialize_population_2beams(population, population_size)	# creating an initiali population with random individuals
+	nr_of_genes =					nr_of_beams													# individual is described by its genes; [a, b]; the number of geses is equal to the number of ion beams used in irradiation
+	cross_rate = 					1.0															# probability of crossing (křížení), typically 0.7 - 1
+	mutation_rate = 				0.05														# probability of mutation of each gene; gene = parameter of an individual (a, b)
+	population_size = 				800															# nr. of individuals in one population; must be even number!
+	nr_of_generations = 			100															# nr. of populations in the simulation
 	
-	array_fitness =			[]															# will contain the fitness values of all individuals in the population
+	population = 					Array.new(population_size){Array.new(nr_of_genes)} 			# array population_size x nr. of genes (80x2); contains all individuals in the population
+	population = 					initialize_population_5beams(population, population_size)	# creating an initiali population with random individuals	
 	
-	puts "-------Start-----------"
+	array_fitness =					[]															# will contain the fitness values of all individuals in the population
+	
+	puts "------- Start -----------"
 	puts
 	puts
 	puts
@@ -224,7 +273,7 @@ task :optimization_genetic_2beams do
 		
 		# calculate the fitness value for each individual in the population; keep the lowest and the highest fitness
 		(0..population_size - 1).each do |i|
-			array_fitness[i] = fitness_2beams(population[i], array_A, array_B, nr_of_coat_bins)		# calculating fitness funcition for each individual in the population
+			array_fitness[i] = fitness_5beams(population[i], array_A, array_B, array_C, array_D, array_E, nr_of_coat_bins)		# calculating fitness funcition for each individual in the population
 			
 			if array_fitness[i] > best_fitness 										
 				best_fitness = 			array_fitness[i]							# saving the value of the best fitness
@@ -241,10 +290,10 @@ task :optimization_genetic_2beams do
 		sum_fitness = 0.0
 		
 		(0..population_size - 1).each do |i|	
-			array_fitness[i] -= 	0.999 * min_fitness 				# it is not possible to sumbtract the whole value of min_fitness - in that case, if all individuals in the population are the same, min_fitness = best_fitness => after the transformation, all individuals will have fitness equal to 0 and the method pick_random_individuum won't work
+			array_fitness[i] -= 	0.999 * min_fitness 							# it is not possible to sumbtract the whole value of min_fitness - in that case, if all individuals in the population are the same, min_fitness = best_fitness => after the transformation, all individuals will have fitness equal to 0 and the method pick_random_individuum won't work
 			sum_fitness += 			array_fitness[i]		
 		end
-	
+		
 		# creating a new population, which will replace the current population at the end of the cycle
 		(0..population_size - 1).step(2) do |i_individuum|												# the cycle is repeated POPULATION_SIZE/2 - times; in each iteration, two random individuals are chosen for crossing; 2 descendant are created and saved into a new population
 			
@@ -262,8 +311,9 @@ task :optimization_genetic_2beams do
 						new_population[i_individuum][gene_index] = 		population[individuum_index_2][gene_index]
 						new_population[i_individuum + 1][gene_index] = 	population[individuum_index_1][gene_index]
 					end
+
 				end
-				
+
 				(0..1).each do |child|														# iteration over 2 descendants
 					# mutation
 					# after the crossing, mutation of both descendants follows; each gene of each descendant is modified with the probability of MUTATION_RATE; the gene is modified by adding a random value from a certain distribution (e.g. normal distribution); a small modification should be more common, than a large one
@@ -278,8 +328,9 @@ task :optimization_genetic_2beams do
 								# puts "gene: #{gene_index}"
 								# pp 	 new_population[i_individuum + child]
 								# puts "sum of genes: #{new_population[i_individuum + child].sum}"
+								# puts "----- //Mutation ------"
 
-							if new_population[i_individuum + child][gene_index] < 0 		# the value of genes a, b must be from an interval 0 - 1
+							if new_population[i_individuum + child][gene_index] < 0 		# the value of genes a, b, c... must be positive
 								puts "WARNING: new_population[#{i_individuum + child}][#{gene_index}] = #{new_population[i_individuum + child][gene_index]}; set to 0"
 								new_population[i_individuum + child][gene_index] = 0
 							end							
@@ -304,10 +355,10 @@ task :optimization_genetic_2beams do
 		end # new population has been completed
 
 		# elitism - artifitial preservation of the best individual; ensures, that the best individual will survive to the following population; enables a faster convergation to the optimal solution (optimal individual)
-		new_population[0] = population[best_fitness_index]	
+		new_population[0] = population[best_fitness_index]							# the best individual is pasted to the first position in the new population
 
 		population = new_population													# current population is replaced by the new population
-		
+
 		puts "--------------------------------------------------------------------------------"
 		puts "Generation" + i_generation.to_s + ", Best fitness:" + best_fitness.to_s + ", Best fitness index:" + best_fitness_index.to_s
 		puts "Best individual: " + population[best_fitness_index].to_s
@@ -315,6 +366,6 @@ task :optimization_genetic_2beams do
 		puts
 		puts
 		
-		# optimization_plot_2beams(population[best_fitness_index], file_DPA_1, file_DPA_2, folder_images, i_generation, coat_width, clad_width, nr_of_coat_bins, coating_type)
+		optimization_plot_5beams(population[best_fitness_index], file_DPA_1, file_DPA_2, file_DPA_3, file_DPA_4, file_DPA_5, folder_images, i_generation, coat_width, clad_width, nr_of_coat_bins, coating_type)
    end
 end

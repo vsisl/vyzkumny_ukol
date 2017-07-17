@@ -631,102 +631,7 @@ task :simulation_results do
 end
 #-------------------------------------------------------------------------------------------------------------------------------------
 
-desc "simple irradiation optimization, 2 beams only"
-task :optimization_simple do
-	folder_data = 					"myData"
-	file_simulation_settings = 		"#{folder_data}/simulation_settings"
-	folder_outputs = 				"#{folder_data}/Outputs_FeCrAl"
-	file_DPA_1 =					"#{folder_outputs}/FeCrAl_Si28_1700keV_DPA.dat"
-	file_DPA_2 =					"#{folder_outputs}/FeCrAl_Si28_3000keV_DPA.dat"
-	# file_DPA_1 =					"#{folder_outputs}/test_1.dat"
-	# file_DPA_2 =					"#{folder_outputs}/test_3.dat"
 
-	simulation_settings = Marshal.load(File.open(file_simulation_settings, 'rb').read)		# simulation_settings is a hash containing all data from the file_simulation_settings		
- 	#pp simulation_settings
-
- 	nr_of_steps = 	1000
-	array_a = 		[]
-	array_S1 = 		[]
-	array_S2 = 		[]
-	array_AVG = 	[]
-	array_SDEV =	[]
-	coat_width = 	simulation_settings["FeCrAl"]["coat_width"].to_f
-	clad_width = 	simulation_settings["FeCrAl"]["clad_width"].to_f
-	bin_width = 	(coat_width + clad_width)/100 						# Delta_z [A]
-	#puts bin_width
-	nr_of_coat_bins = ((coat_width/(coat_width + clad_width)) * 100).to_i	
-	#puts nr_of_coat_bins
-	array_f = 		[]
-	array_h = 		[]
-	array_g = 		[]
-	
-	File.foreach(file_DPA_1).with_index do |line, line_nr|					# loading the first irradiation profile
-		if line_nr > 0 and line_nr < nr_of_coat_bins + 1					# skip firts line (header), index 0; load only tho coat bins
-			array_f << line.strip.split[1].to_f			
-		end
-	end
-	# puts array_f
-	# puts array_f.size
-	# puts array_f[0]
-	# puts array_f[nr_of_coat_bins]
-	# puts array_f[nr_of_coat_bins - 1]
-	File.foreach(file_DPA_2).with_index do |line, line_nr|					# loading the second irradiation profile
-		if line_nr > 0 and line_nr < nr_of_coat_bins + 1					# skip firts line (header), index 0; load only tho coat bins
-			array_h << line.strip.split[1].to_f			
-		end
-	end
-	# puts array_h
-	
-	(0..nr_of_steps - 1).each do |j|				 					# inicializing vectors
-		array_a 	<< j/nr_of_steps.to_f								# create the vector a, e.g. a = (0, 0.001, 0.002, .... 0.999, 1)
-		array_S1 	<< 0.to_f
-		array_S2 	<< 0.to_f
-		array_AVG 	<< 0.to_f
-		array_SDEV 	<< 0.to_f
-	end
-	# puts array_a
-	
-	# ----------------	algorithm based on the COMPARISON OF THE STANDARD DEVIATION of the damage distribution profile for each parameter a \in (0..1); for more info see FUNDAMENTALS OF MONTE CARLO PARTICLE TRANSPORT, FORREST B. BROWN, Lecture notes for Monte Carlo course, slide 6-6, http://kfe.fjfi.cvut.cz/~horny/ostatni/VU_HORNY/REFS1/LA-UR-05-4983_Monte_Carlo_Lectures.pdf	
-	(0..nr_of_steps - 1).each do |j|													# iteration over the array_a
-		(0..nr_of_coat_bins - 1).each do |i|											# iteration over the depth of the target; the target is divided into 100 bins
-			array_g[i] 	= array_a[j] * array_f[i] + (1 - array_a[j]) * array_h[i]		# g(z) is the overall distribution of defects made by a sum of the first distribution f(z) and the second distribution g(z)
-			array_S1[j]	= array_S1[j] + array_g[i]											
-			array_S2[j]	= array_S2[j] + array_g[i]**2
-		end
-
-		# if array_a[j] == 0.25 
-		# 	puts array_g
-		# end
-
-		array_SDEV[j] = Math.sqrt(1/(nr_of_coat_bins - 1).to_f * (array_S2[j]/nr_of_coat_bins - (array_S1[j]/nr_of_coat_bins)**2))	# standard deviation of the damage distribution for each parameter a; formula from MCNP
-		puts "a: #{array_a[j]}      SDEV: #{array_SDEV[j]}"
-		# array_SDEV[j] = 1/100.to_f * Math.sqrt(100 * array_S2[j] - array_S1[j]**2)		# alternative formula for standard deviation
-		# array_SDEV[j] = Math.sqrt((100 * array_S2[j] - array_S1[j]**2)/(100 * 99))		# alternative formula for standard deviation
-	end
-	# puts array_a
-	# puts "---"
-	# puts array_S1
-	# puts "---"
-	# puts array_S2
-	# puts "---"
-	# # puts array_AVG
-	# puts "---"
-	# puts array_SDEV
-	# puts "---"
-	# puts array_SDEV.min
-	print "nr_of_steps:"
-	puts nr_of_steps
-	# print "index for min. value:"
-	# puts array_SDEV.index { |x| x == array_SDEV.min }  
-	print "a for min. value:"
-	puts array_a[array_SDEV.index { |x| x == array_SDEV.min } ]
-	# print "index for max. value:"
-	# puts array_SDEV.index { |x| x == array_SDEV.max }  
-	# print "a for max. value:"
-	# puts array_a[array_SDEV.index { |x| x == array_SDEV.max } ]
-	puts "---"
-end
-#-------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -748,8 +653,15 @@ end
 # require 'C:/Users/vacla/Downloads/SRIM-2013/Rakefile_FeCrAl_test.rb'
 # require 'C:/Users/vacla/Downloads/SRIM-2013/Rakefile_PCD.rb'
 
-
+#-------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------      OPTIMIZATION     --------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------
+require 'C:/Users/vacla/Downloads/SRIM-2013/Rakefile_optimization_simple.rb'
 require 'C:/Users/vacla/Downloads/SRIM-2013/Rakefile_optimization_genetic_2beams.rb'
 require 'C:/Users/vacla/Downloads/SRIM-2013/Rakefile_optimization_genetic_3beams.rb'
+require 'C:/Users/vacla/Downloads/SRIM-2013/Rakefile_optimization_genetic_5beams.rb'
+
 
 #-------------------------------------------------------------------------------------------------------------------------------------
