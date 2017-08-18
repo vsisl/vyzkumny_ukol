@@ -191,13 +191,13 @@ desc "optimization based on genetic algorithms, for three ion beams"
 task :optimization_genetic_3beams do
 	folder_data = 					"myData"
 	file_simulation_settings = 		"#{folder_data}/simulation_settings"
-	coating_type =					"FeCrAl"
+	coating_type =					"CrN"
 	folder_outputs = 				"#{folder_data}/Outputs_#{coating_type}"
-	folder_images = 				"#{folder_outputs}/Img_optimalizace"
 	nr_of_beams =					3
-	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Si28_1700keV_DPA.dat"
-	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_O16_3000keV_DPA.dat"
-	file_DPA_3 = 					"#{folder_outputs}/#{coating_type}_O16_6000keV_DPA.dat"
+	folder_images = 				"#{folder_outputs}/Img_optimalizace_#{nr_of_beams}beams"	
+	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Ni58_3400keV_DPA.dat"
+	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_Ni58_6000keV_DPA.dat"
+	file_DPA_3 =					"#{folder_outputs}/#{coating_type}_O16_3400keV_DPA.dat"
 	# file_DPA_1 =					"#{folder_outputs}/test_7.dat"
 	# file_DPA_2 =					"#{folder_outputs}/test_8.dat"
 	# file_DPA_3 =					"#{folder_outputs}/test_9.dat"
@@ -220,8 +220,8 @@ task :optimization_genetic_3beams do
 	nr_of_genes =					nr_of_beams													# individual is described by its genes; [a, b]; the number of geses is equal to the number of ion beams used in irradiation
 	cross_rate = 					1.0															# probability of crossing (křížení), typically 0.7 - 1
 	mutation_rate = 				0.05														# probability of mutation of each gene; gene = parameter of an individual (a, b)
-	population_size = 				80															# nr. of individuals in one population; must be even number!
-	nr_of_generations = 			100															# nr. of populations in the simulation
+	population_size = 				300															# nr. of individuals in one population; must be even number!
+	nr_of_generations = 			20															# nr. of populations in the simulation
 	
 	population = 					Array.new(population_size){Array.new(nr_of_genes)} 			# array population_size x nr. of genes (80x2); contains all individuals in the population
 	population = 					initialize_population_3beams(population, population_size)	# creating an initiali population with random individuals	
@@ -274,6 +274,7 @@ task :optimization_genetic_3beams do
 		(0..population_size - 1).step(2) do |i_individuum|												# the cycle is repeated POPULATION_SIZE/2 - times; in each iteration, two random individuals are chosen for crossing; 2 descendant are created and saved into a new population
 			
 			# natural selection = random selection of two individuals which will enter crossing (and mutation)																			
+			# roulette wheel selection
 			individuum_index_1 = pick_random_individuum(array_fitness, sum_fitness, population_size)	# randomly chosen individual 1
 			individuum_index_2 = pick_random_individuum(array_fitness, sum_fitness, population_size) 	# randomly chosen individual 2
 					
@@ -313,6 +314,7 @@ task :optimization_genetic_3beams do
 						end
 					end					
 
+					# normalization
 					# after crossing it may happen that the sum of the genes a + b + c + ... is not equal to 0 (this happens regardless of mutation); therefore it is needed to normalize the values of genes
 						# puts "------ Normalization after crossing ------"	
 					sum_of_genes = new_population[i_individuum + child].sum 					# sum of all genes

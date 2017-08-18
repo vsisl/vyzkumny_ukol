@@ -87,7 +87,7 @@ end
 def pick_random_individuum(array_fitness, sum_fitness, population_size)  		# array_fitness contains the fitness values of all individials in the population; sum_fitness = array_fitness.sum
 	sum = 0.0
 	fitnessPoint = Kernel.rand * sum_fitness									# random number from the interval 0, sum_fitness
-	#puts fitnessPoint
+	
 	if sum_fitness == 0.0 														# method fails if all individuals in the population are the same and all have fitness = 0; in that case in returns a sequence of indexes (0..population_size - 1) instead of one integer index
 		puts "WARNING: all individuals have fitness = 0, the pick_random_individuum method won't work"
 	end
@@ -213,14 +213,14 @@ desc "optimization based on genetic algorithms, for five ion beams"
 task :optimization_genetic_5beams do
 	folder_data = 					"myData"
 	file_simulation_settings = 		"#{folder_data}/simulation_settings"
-	coating_type =					"FeCrAl"
+	coating_type =					"Ti2AlC"
 	folder_outputs = 				"#{folder_data}/Outputs_#{coating_type}"
 	nr_of_beams =					5
 	folder_images = 				"#{folder_outputs}/Img_optimalizace_#{nr_of_beams}beams"
-	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Si28_1700keV_DPA.dat"
-	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_O16_3000keV_DPA.dat"
-	file_DPA_3 = 					"#{folder_outputs}/#{coating_type}_O16_6000keV_DPA.dat"
-	file_DPA_4 =					"#{folder_outputs}/#{coating_type}_Si28_3000keV_DPA.dat"
+	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Fe56_6000keV_DPA.dat"
+	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_Ni58_6000keV_DPA.dat"
+	file_DPA_3 = 					"#{folder_outputs}/#{coating_type}_Ni58_1700keV_DPA.dat"
+	file_DPA_4 =					"#{folder_outputs}/#{coating_type}_Ni58_3400keV_DPA.dat"
 	file_DPA_5 = 					"#{folder_outputs}/#{coating_type}_He4_1700keV_DPA.dat"
 	
 	simulation_settings =			Marshal.load(File.open(file_simulation_settings, 'rb').read)		# simulation_settings is a hash containing all data from the file_simulation_settings

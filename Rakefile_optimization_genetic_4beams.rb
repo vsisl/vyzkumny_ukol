@@ -195,14 +195,16 @@ desc "optimization based on genetic algorithms, for 4 ion beams"
 task :optimization_genetic_4beams do
 	folder_data = 					"myData"
 	file_simulation_settings = 		"#{folder_data}/simulation_settings"
-	coating_type =					"Ti2AlC"
+	coating_type =					"CrN"
 	folder_outputs = 				"#{folder_data}/Outputs_#{coating_type}"
 	nr_of_beams =					4
 	folder_images = 				"#{folder_outputs}/Img_optimalizace_#{nr_of_beams}beams"
-	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Fe56_6000keV_DPA.dat"
+	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Ni58_3400keV_DPA.dat"
 	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_Ni58_6000keV_DPA.dat"
-	file_DPA_3 = 					"#{folder_outputs}/#{coating_type}_Ni58_1700keV_DPA.dat"
-	file_DPA_4 =					"#{folder_outputs}/#{coating_type}_Ni58_3400keV_DPA.dat"
+	file_DPA_3 =					"#{folder_outputs}/#{coating_type}_O16_3400keV_DPA.dat"
+	file_DPA_4 = 					"#{folder_outputs}/#{coating_type}_Ni58_1700keV_DPA.dat"
+
+
 	
 	simulation_settings =			Marshal.load(File.open(file_simulation_settings, 'rb').read)		# simulation_settings is a hash containing all data from the file_simulation_settings
 	coat_width = 					simulation_settings[coating_type]["coat_width"].to_f

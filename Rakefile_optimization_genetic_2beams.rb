@@ -171,12 +171,12 @@ desc "optimization based on genetic algorithms, for two ion beams"
 task :optimization_genetic_2beams do
 	folder_data = 					"myData"
 	file_simulation_settings = 		"#{folder_data}/simulation_settings"
-	coating_type =					"FeCrAl"
+	coating_type =					"CrN"
 	folder_outputs = 				"#{folder_data}/Outputs_#{coating_type}"
 	nr_of_beams =					2
 	folder_images = 				"#{folder_outputs}/Img_optimalizace_#{nr_of_beams}beams"
-	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Si28_1700keV_DPA.dat"
-	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_Si28_3000keV_DPA.dat"
+	file_DPA_1 =					"#{folder_outputs}/#{coating_type}_Ni58_3400keV_DPA.dat"
+	file_DPA_2 =					"#{folder_outputs}/#{coating_type}_Ni58_6000keV_DPA.dat"
 	# file_DPA_1 =					"#{folder_outputs}/test_1.dat"
 	# file_DPA_2 =					"#{folder_outputs}/test_3.dat"
 
