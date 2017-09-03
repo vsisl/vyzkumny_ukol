@@ -1,7 +1,7 @@
 # ATF multi-component cladding irradiation using SRIM
 Presented scripts enable to 
-  execute multiple TRIM input files in a batch,
-  process the outputs of TRIM simulations, 
+  execute multiple SRIM input files in a batch,
+  process the outputs of SRIM simulations, 
   calculate distribution of radiation damage, 
   create plots of radiation damage distribution,
   optimize the irradiation process consisting of irradiation by multiple ion beams of different energies in order to receive possibly   homogenious damage distribution.
