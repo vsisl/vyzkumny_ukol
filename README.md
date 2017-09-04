@@ -75,3 +75,6 @@ Commands "rake optimization_genetic_Xbeams" perform genetic optimization calcula
 - adjust the code to use the new methods rather than the old ones
     don't forget to change the input variables for all methods
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
+for any questions or comments: vaclav.sisl@gmail.com
